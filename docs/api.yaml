@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: HP VVS Sales Automation Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /appointment-summary/run:
+    post:
+      summary: Run Appointment Summary flow
+      operationId: runAppointmentSummary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentSummaryRequest'
+      responses:
+        '200':
+          description: Appointment summary rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSummaryRow'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: UP
+    AppointmentSummaryRequest:
+      type: object
+      properties:
+        brand:
+          type: string
+        rep:
+          type: string
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+    AppointmentSummaryRow:
+      type: object
+      properties:
+        Visit Date:
+          type: string
+          description: Visit date in America/Los_Angeles timezone
+        RootApptID:
+          type: string
+        Customer:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string
+        Visit Type:
+          type: string
+        Visit #:
+          type: string
+        SO#:
+          type: string
+        Brand:
+          type: string
+        Sales Stage:
+          type: string
+        Conversion Status:
+          type: string
+        Custom Order Status:
+          type: string
+        Center Stone Order Status:
+          type: string
+        Assigned Rep:
+          type: string
+        Assisted Rep:
+          type: string
+      required:
+        - Visit Date
+        - RootApptID
+        - Customer
+        - Phone
+        - Email
+        - Visit Type
+        - Visit #
+        - SO#
+        - Brand
+        - Sales Stage
+        - Conversion Status
+        - Custom Order Status
+        - Center Stone Order Status
+        - Assigned Rep
+        - Assisted Rep

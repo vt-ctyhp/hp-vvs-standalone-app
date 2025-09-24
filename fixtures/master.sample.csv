@@ -1,0 +1,3 @@
+Visit Date,Root Appt ID,Customer Name,PhoneNorm,EmailLower,Appt Type,Visit Number,Sales Order,Brand,Sales Stage,Conversion Status,CO Status,CS Order Status,Assigned Sales Rep,Assisted Sales Rep
+2024-03-15,ROOT-1,Alice Smith,555-1111,alice@example.com,Showroom,1,SO-100,HP,Presented,Pending,Cutting,Queued,Reed,Morgan
+2024-03-16,ROOT-2,Bob Jones,555-2222,bob@example.com,Virtual,2,SO-200,VVS,Closed Won,Converted,Delivered,Delivered,Morgan,Reed

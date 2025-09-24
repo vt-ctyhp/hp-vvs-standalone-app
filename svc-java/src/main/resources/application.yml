@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: hp-vvs-service
+  jackson:
+    time-zone: America/Los_Angeles
+  flyway:
+    locations: classpath:db/migration
+
+app:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/hpvvs}
+    username: ${DB_USERNAME:hpvvs}
+    password: ${DB_PASSWORD:hpvvs}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+server:
+  port: ${PORT:8080}

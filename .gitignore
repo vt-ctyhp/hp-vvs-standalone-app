@@ -1,0 +1,5 @@
+svc-java/.gradle/
+svc-java/build/
+ui-electron/node_modules/
+ui-electron/.env
+.DS_Store
