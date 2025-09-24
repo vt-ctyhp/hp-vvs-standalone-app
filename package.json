@@ -5,13 +5,17 @@
   "main": "src/main/electron.js",
   "type": "module",
   "scripts": {
+    "predev": "npm run rebuild:electron",
     "dev": "electron .",
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
-    "test": "node --test"
+    "pretest": "npm run rebuild:node",
+    "test": "node --test",
+    "rebuild:electron": "npm rebuild better-sqlite3 --runtime=electron --target=29.0.0",
+    "rebuild:node": "npm rebuild better-sqlite3"
   },
   "dependencies": {
-    "better-sqlite3": "^8.6.0",
+    "better-sqlite3": "^12.4.1",
     "csv-parse": "^5.5.4",
     "dotenv": "^16.4.5",
     "luxon": "^3.4.4"

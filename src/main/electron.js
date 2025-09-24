@@ -13,7 +13,9 @@ function createWindow() {
     width: 1024,
     height: 768,
     webPreferences: {
-      preload: path.join(__dirname, '../ui/preload.js'),
+      preload: path.join(__dirname, '../ui/preload.cjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   });
 
