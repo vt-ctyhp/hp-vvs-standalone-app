@@ -1,0 +1,4 @@
+Customer Name,Visit Date,Root Appt ID,Primary Phone,Phone (Normalized),Email,Email Lower,Appt Type,Visit #,SO Number,Brand,Stage,Conversion Status,Custom Status,Center Stone Status,Assigned Rep,Assisted Rep
+Alice Example,2024-04-01,HP-1001,555-111-2222,15551112222,alice@example.com,alice@example.com,Consult,1,SO-9001,HPUSA,Consult,In Progress,Pending Design,In Queue,Jamie Rep,Sky Helper
+Bob Sample,2024-04-03,HP-1002,555-333-4444,15553334444,bob@sample.com,bob@sample.com,Diamond Viewing,2,SO-9002,VVS,Deposit,Won,Production,Ordered,Kelly Rep,Jamie Rep
+Cara Client,2024-04-05,HP-1003,555-666-7777,15556667777,cara@client.com,cara@client.com,Consult,1,,HPUSA,Lead,New Lead,New,Not Started,Jamie Rep,

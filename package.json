@@ -1,0 +1,22 @@
+{
+  "name": "hp-vvs-standalone-app",
+  "version": "0.1.0",
+  "description": "Desktop local port of HP/VVS Sales Automation",
+  "main": "src/main/electron.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron .",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "better-sqlite3": "^8.6.0",
+    "csv-parse": "^5.5.4",
+    "dotenv": "^16.4.5",
+    "luxon": "^3.4.4"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0"
+  }
+}
