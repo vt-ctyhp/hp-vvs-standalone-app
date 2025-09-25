@@ -1,12 +1,18 @@
-node_modules/
-data/
-.env
-npm-debug.log*
+# Build outputs
+svc-java/build/
+svc-java/.gradle/
+svc-java/out/
+
+# Node modules
+ui-electron/node_modules/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# OS artifacts
 .DS_Store
 
-# SQLite temp files
-*.sqlite
-*.db
-*.db-journal
-*.db-shm
-*.db-wal
+# Env files
+infra/.env

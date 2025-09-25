@@ -1,0 +1,1151 @@
+openapi: 3.0.3
+defaultContentType: application/json
+info:
+  title: HP / VVS Sales Automation Service API
+  version: 1.0.0
+  description: >-
+    HTTP API for the HP / VVS Sales Automation local service. All field names are
+    derived from the Context Pack and remain the single source of truth.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+paths:
+  /health:
+    get:
+      summary: Service health check
+      operationId: health
+      responses:
+        '200':
+          description: Health payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /appointment-summary/run:
+    post:
+      summary: Run appointment summary snapshot
+      operationId: runAppointmentSummary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentSummaryRequest'
+      responses:
+        '200':
+          description: Appointment summary rows
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppointmentSummaryRow'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /client-status/submit:
+    post:
+      summary: Submit client status update
+      operationId: submitClientStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientStatusSubmitRequest'
+            example:
+              rootApptId: HP-1001
+              salesStage: CONSULT
+              conversionStatus: OPEN
+              customOrderStatus: N/A
+              inProductionStatus: null
+              centerStoneOrderStatus: null
+              nextSteps: Book DV
+              assistedRep: Alex
+              updatedBy: tester@local
+      responses:
+        '200':
+          description: Client status submission accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientStatusResponse'
+            examples:
+              success:
+                value:
+                  rootApptId: HP-1001
+                  status: OK
+                  updatedAt: 2025-10-01T17:30:00-07:00
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /deadlines/record:
+    post:
+      summary: Record a deadline adjustment
+      operationId: recordDeadline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeadlineRecordRequest'
+            example:
+              rootApptId: HP-1001
+              deadlineType: 3D
+              deadlineDate: 2025-10-01
+              movedBy: tester@local
+              assistedRep: Alex
+      responses:
+        '200':
+          description: Deadline recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadlineRecordResponse'
+            examples:
+              success:
+                value:
+                  rootApptId: HP-1001
+                  deadlineType: 3D
+                  deadlineDate: 2025-10-01
+                  moveCount: 1
+                  updatedAt: 2025-10-01T17:35:00-07:00
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /diamonds/order-approvals:
+    post:
+      summary: Approve diamonds order proposals
+      operationId: approveDiamondsOrders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiamondsOrderApprovalsRequest'
+            example:
+              items:
+                - rootApptId: HP-1001
+                  decision: On the Way
+                  orderedBy: Alex Harper
+                  orderedDate: 2025-01-10
+              defaultOrderedBy: Jamie Lee
+              defaultOrderedDate: 2025-01-12
+              applyDefaultsToAll: false
+      responses:
+        '200':
+          description: Diamonds orders updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiamondsActionResponse'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Diamonds feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /diamonds/confirm-delivery:
+    post:
+      summary: Confirm delivery for diamonds in transit
+      operationId: confirmDiamondsDelivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiamondsConfirmDeliveryRequest'
+            example:
+              items:
+                - rootApptId: HP-1001
+                  memoDate: 2025-01-25
+                  selected: true
+                - rootApptId: HP-1003
+                  selected: false
+              defaultMemoDate: 2025-01-22
+              applyDefaultToAll: false
+      responses:
+        '200':
+          description: Diamonds delivery confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiamondsActionResponse'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Diamonds feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /diamonds/stone-decisions:
+    post:
+      summary: Apply diamond stone decisions
+      operationId: decideDiamondsStones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiamondsStoneDecisionsRequest'
+            example:
+              items:
+                - rootApptId: HP-1002
+                  decision: Keep
+                  decidedBy: Alex Harper
+                  decidedDate: 2025-02-02
+              defaultDecidedBy: Jamie Lee
+              defaultDecidedDate: 2025-02-03
+              applyDefaultsToAll: false
+      responses:
+        '200':
+          description: Stones updated with decisions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiamondsActionResponse'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Diamonds feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/record:
+    post:
+      summary: Record or update a payments ledger document
+      operationId: recordPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRecordRequest'
+            example:
+              anchorType: SO
+              rootApptId: HP-2001
+              soNumber: SO-2001
+              docType: Deposit Receipt
+              paymentDateTime: 2024-07-04T10:15:00-07:00
+              method: Card
+              reference: AUTH-001
+              notes: Initial deposit
+              amountGross: 200.0
+              feePercent: 2.75
+              lines:
+                - desc: Deposit
+                  qty: 1
+                  amt: 200.0
+      responses:
+        '200':
+          description: Payment recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentRecordResponse'
+        '400':
+          description: Invalid request payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Payments feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /payments/summary:
+    get:
+      summary: Summarize payments for a sales order or appointment
+      operationId: summarizePayments
+      parameters:
+        - in: query
+          name: rootApptId
+          schema:
+            type: string
+          description: Filter ledger rows for the given RootApptID.
+        - in: query
+          name: soNumber
+          schema:
+            type: string
+          description: Filter ledger rows for the given sales order number.
+      responses:
+        '200':
+          description: Payments summary for the requested anchor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsSummaryResponse'
+        '400':
+          description: Missing or invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Payments feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /reports/by-status:
+    get:
+      summary: Retrieve report rows grouped by client status
+      operationId: reportsByStatus
+      parameters:
+        - in: query
+          name: filters
+          schema:
+            type: string
+          description: Comma separated key:value filters (e.g. `status:Deposit,brand:HPUSA`).
+      responses:
+        '200':
+          description: Report rows for the requested filters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsByStatusResponse'
+        '404':
+          description: Reports feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /reports/by-rep:
+    get:
+      summary: Retrieve report rows ordered by assigned rep
+      operationId: reportsByRep
+      parameters:
+        - in: query
+          name: filters
+          schema:
+            type: string
+          description: Comma separated key:value filters (e.g. `brand:HPUSA`).
+      responses:
+        '200':
+          description: Report rows for the requested filters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsByRepResponse'
+        '404':
+          description: Reports feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /dashboard/kpis:
+    get:
+      summary: Fetch dashboard KPI metrics for the given date window
+      operationId: dashboardKpis
+      parameters:
+        - in: query
+          name: dateFrom
+          schema:
+            type: string
+            format: date
+          description: Optional inclusive visit date lower bound.
+        - in: query
+          name: dateTo
+          schema:
+            type: string
+            format: date
+          description: Optional inclusive visit date upper bound.
+      responses:
+        '200':
+          description: KPI metrics payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardKpiResponse'
+        '404':
+          description: Reports feature disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          example: UP
+    AppointmentSummaryRequest:
+      type: object
+      properties:
+        brand:
+          type: string
+          description: Filter rows matching the given brand (case-insensitive).
+        rep:
+          type: string
+          description: Filter rows where either Assigned Rep or Assisted Rep matches.
+        dateFrom:
+          type: string
+          format: date
+          description: Inclusive visit date lower bound (America/Los_Angeles).
+        dateTo:
+          type: string
+          format: date
+          description: Inclusive visit date upper bound (America/Los_Angeles).
+    AppointmentSummaryRow:
+      type: object
+      required:
+        - Visit Date
+        - RootApptID
+        - Customer
+        - Phone
+        - Email
+        - Visit Type
+        - 'Visit #'
+        - 'SO#'
+        - Brand
+        - Sales Stage
+        - Conversion Status
+        - Custom Order Status
+        - Center Stone Order Status
+        - Assigned Rep
+        - Assisted Rep
+      properties:
+        Visit Date:
+          type: string
+          format: date
+        RootApptID:
+          type: string
+        Customer:
+          type: string
+        Phone:
+          type: string
+        Email:
+          type: string
+        Visit Type:
+          type: string
+        'Visit #':
+          type: integer
+        'SO#':
+          type: string
+        Brand:
+          type: string
+        Sales Stage:
+          type: string
+        Conversion Status:
+          type: string
+        Custom Order Status:
+          type: string
+        Center Stone Order Status:
+          type: string
+        Assigned Rep:
+          type: string
+        Assisted Rep:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    ClientStatusSubmitRequest:
+      type: object
+      required:
+        - rootApptId
+        - salesStage
+        - conversionStatus
+        - updatedBy
+      properties:
+        rootApptId:
+          type: string
+        salesStage:
+          type: string
+        conversionStatus:
+          type: string
+        customOrderStatus:
+          type: string
+          nullable: true
+        inProductionStatus:
+          type: string
+          nullable: true
+        centerStoneOrderStatus:
+          type: string
+          nullable: true
+        nextSteps:
+          type: string
+          nullable: true
+        assistedRep:
+          type: string
+          nullable: true
+        updatedBy:
+          type: string
+    ClientStatusResponse:
+      type: object
+      required:
+        - rootApptId
+        - status
+        - updatedAt
+      properties:
+        rootApptId:
+          type: string
+        status:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    DeadlineRecordRequest:
+      type: object
+      required:
+        - rootApptId
+        - deadlineType
+        - deadlineDate
+        - movedBy
+      properties:
+        rootApptId:
+          type: string
+        deadlineType:
+          type: string
+          enum: [3D, PROD]
+        deadlineDate:
+          type: string
+          format: date
+        movedBy:
+          type: string
+        assistedRep:
+          type: string
+          nullable: true
+    DeadlineRecordResponse:
+      type: object
+      required:
+        - rootApptId
+        - deadlineType
+        - deadlineDate
+        - moveCount
+        - updatedAt
+      properties:
+        rootApptId:
+          type: string
+        deadlineType:
+          type: string
+        deadlineDate:
+          type: string
+          format: date
+        moveCount:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+    DiamondsOrderApprovalsRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DiamondsOrderApprovalItem'
+        defaultOrderedBy:
+          type: string
+          nullable: true
+        defaultOrderedDate:
+          type: string
+          format: date
+          nullable: true
+        applyDefaultsToAll:
+          type: boolean
+          default: false
+    DiamondsOrderApprovalItem:
+      type: object
+      required:
+        - rootApptId
+        - decision
+      properties:
+        rootApptId:
+          type: string
+        decision:
+          type: string
+          enum:
+            - On the Way
+            - Not Approved
+        orderedBy:
+          type: string
+          nullable: true
+        orderedDate:
+          type: string
+          format: date
+          nullable: true
+    DiamondsConfirmDeliveryRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DiamondsConfirmDeliveryItem'
+        defaultMemoDate:
+          type: string
+          format: date
+          nullable: true
+        applyDefaultToAll:
+          type: boolean
+          default: false
+    DiamondsConfirmDeliveryItem:
+      type: object
+      required:
+        - rootApptId
+      properties:
+        rootApptId:
+          type: string
+        memoDate:
+          type: string
+          format: date
+          nullable: true
+        selected:
+          type: boolean
+    DiamondsStoneDecisionsRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/DiamondsStoneDecisionItem'
+        defaultDecidedBy:
+          type: string
+          nullable: true
+        defaultDecidedDate:
+          type: string
+          format: date
+          nullable: true
+        applyDefaultsToAll:
+          type: boolean
+          default: false
+    DiamondsStoneDecisionItem:
+      type: object
+      required:
+        - rootApptId
+        - decision
+      properties:
+        rootApptId:
+          type: string
+        decision:
+          type: string
+          enum:
+            - Keep
+            - Return
+            - Replace
+        decidedBy:
+          type: string
+          nullable: true
+        decidedDate:
+          type: string
+          format: date
+          nullable: true
+    DiamondsActionResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiamondsActionResult'
+    DiamondsActionResult:
+      type: object
+      required:
+        - rootApptId
+        - affectedRows
+        - centerStoneOrderStatus
+        - counts
+        - updatedAt
+      properties:
+        rootApptId:
+          type: string
+        affectedRows:
+          type: integer
+          format: int32
+        centerStoneOrderStatus:
+          type: string
+        counts:
+          type: object
+          required:
+            - total
+            - proposing
+            - notApproved
+            - onTheWay
+            - delivered
+            - inStock
+            - keep
+            - return
+            - replace
+          properties:
+            total:
+              type: integer
+              format: int32
+            proposing:
+              type: integer
+              format: int32
+            notApproved:
+              type: integer
+              format: int32
+            onTheWay:
+              type: integer
+              format: int32
+            delivered:
+              type: integer
+              format: int32
+            inStock:
+              type: integer
+              format: int32
+            keep:
+              type: integer
+              format: int32
+            return:
+              type: integer
+              format: int32
+            replace:
+              type: integer
+              format: int32
+        updatedAt:
+          type: string
+          format: date-time
+    PaymentLineItem:
+      type: object
+      properties:
+        desc:
+          type: string
+          description: Line description.
+        qty:
+          type: number
+          format: double
+          description: Quantity applied to the line.
+        amt:
+          type: number
+          format: double
+          description: Amount per unit for the line.
+        lineTotal:
+          type: number
+          format: double
+          description: Quantity multiplied by amount; populated by the server.
+    PaymentRecordRequest:
+      type: object
+      required:
+        - anchorType
+        - docType
+        - paymentDateTime
+        - method
+        - amountGross
+      properties:
+        anchorType:
+          type: string
+          enum: [SO, APPT]
+        rootApptId:
+          type: string
+          nullable: true
+        soNumber:
+          type: string
+          nullable: true
+        docNumber:
+          type: string
+          nullable: true
+          description: Optional explicit ledger document number; otherwise generated.
+        docRole:
+          type: string
+          nullable: true
+          description: Optional override for the inferred document role.
+        docType:
+          type: string
+          enum:
+            - Deposit Invoice
+            - Deposit Receipt
+            - Sales Invoice
+            - Sales Receipt
+            - Credit Memo
+            - Payment Receipt
+        docStatus:
+          type: string
+          nullable: true
+          enum: [DRAFT, ISSUED]
+        paymentDateTime:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum: [Card, Wire, Zelle, Cash, Check, Other]
+        reference:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        amountGross:
+          type: number
+          format: double
+        feePercent:
+          type: number
+          format: double
+          nullable: true
+        feeAmount:
+          type: number
+          format: double
+          nullable: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentLineItem'
+        amountNet:
+          type: number
+          format: double
+          nullable: true
+          description: Optional client-provided net amount; the service recomputes the value.
+        subtotal:
+          type: number
+          format: double
+          nullable: true
+          description: Optional subtotal provided by the client; the service recomputes from lines.
+    PaymentRecordResponse:
+      type: object
+      required:
+        - status
+        - docNumber
+        - docRole
+        - docType
+        - docStatus
+        - paymentDateTime
+        - method
+        - amountGross
+        - amountNet
+        - lines
+        - requestHash
+      properties:
+        status:
+          type: string
+          enum: [CREATED, UPDATED]
+        docNumber:
+          type: string
+        docRole:
+          type: string
+        anchorType:
+          type: string
+        rootApptId:
+          type: string
+          nullable: true
+        soNumber:
+          type: string
+          nullable: true
+        docType:
+          type: string
+        docStatus:
+          type: string
+        paymentDateTime:
+          type: string
+          format: date-time
+        method:
+          type: string
+        reference:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        amountGross:
+          type: number
+          format: double
+        feePercent:
+          type: number
+          format: double
+          nullable: true
+        feeAmount:
+          type: number
+          format: double
+          nullable: true
+        subtotal:
+          type: number
+          format: double
+        amountNet:
+          type: number
+          format: double
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentLineItem'
+        requestHash:
+          type: string
+    PaymentSummaryEntry:
+      type: object
+      required:
+        - docNumber
+        - docRole
+        - docType
+        - docStatus
+        - amountGross
+        - amountNet
+      properties:
+        docNumber:
+          type: string
+        docRole:
+          type: string
+        anchorType:
+          type: string
+        rootApptId:
+          type: string
+          nullable: true
+        soNumber:
+          type: string
+          nullable: true
+        docType:
+          type: string
+        docStatus:
+          type: string
+        paymentDateTime:
+          type: string
+          format: date-time
+          nullable: true
+        method:
+          type: string
+          nullable: true
+        reference:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        amountGross:
+          type: number
+          format: double
+        feePercent:
+          type: number
+          format: double
+          nullable: true
+        feeAmount:
+          type: number
+          format: double
+          nullable: true
+        subtotal:
+          type: number
+          format: double
+          nullable: true
+        amountNet:
+          type: number
+          format: double
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentLineItem'
+        requestHash:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+          nullable: true
+    PaymentsSummaryResponse:
+      type: object
+      required:
+        - invoicesLinesSubtotal
+        - totalPayments
+        - netLinesMinusPayments
+        - byMethod
+        - entries
+      properties:
+        invoicesLinesSubtotal:
+          type: number
+          format: double
+        totalPayments:
+          type: number
+          format: double
+        netLinesMinusPayments:
+          type: number
+          format: double
+        byMethod:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentSummaryEntry'
+    ReportsByStatusResponse:
+      type: object
+      required:
+        - rows
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportsByStatusRow'
+    ReportsByRepResponse:
+      type: object
+      required:
+        - rows
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportsByStatusRow'
+    ReportsByStatusRow:
+      type: object
+      properties:
+        'Visit Date':
+          type: string
+          nullable: true
+        'Order Total':
+          type: number
+          format: double
+        'Total Pay To Date':
+          type: number
+          format: double
+        RootApptID:
+          type: string
+        'Customer Name':
+          type: string
+        'Assigned Rep':
+          type: string
+        'Assisted Rep':
+          type: string
+        Brand:
+          type: string
+        'SO#':
+          type: string
+          nullable: true
+        'Sales Stage':
+          type: string
+        'Conversion Status':
+          type: string
+        'Custom Order Status':
+          type: string
+        'In Production Status':
+          type: string
+          nullable: true
+        'Production Deadline':
+          type: string
+          nullable: true
+        'Center Stone Order Status':
+          type: string
+        'Next Steps':
+          type: string
+          nullable: true
+        'Client Status Report URL':
+          type: string
+          nullable: true
+    DashboardKpiResponse:
+      type: object
+      required:
+        - weightedPipeline
+        - totalDeposits
+        - firstTimeDepositCount
+        - overdueProductionCount
+        - overdueThreeDCount
+      properties:
+        weightedPipeline:
+          type: number
+          format: double
+        totalDeposits:
+          type: number
+          format: double
+        firstTimeDepositCount:
+          type: integer
+          format: int64
+        overdueProductionCount:
+          type: integer
+          format: int64
+        overdueThreeDCount:
+          type: integer
+          format: int64

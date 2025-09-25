@@ -49,3 +49,54 @@ All field names, aliases, and invariants trace back to [`docs/HP_VVS_Sales_Autom
 - The runtime enforces Pacific Time across scheduling and date parsing utilities.
 - Header access is always alias-driven; the helper utilities tolerate order changes and heal missing columns.
 - External integrations (OpenAI, Drive, Sheets) are stubbed locally for the v0 milestone.
+
+## Phase 4 Payments
+
+The payments module is guarded by the `FEATURE_PAYMENTS` flag. Backend tests flip the flag automatically; when running the service manually, export `FEATURE_PAYMENTS=true` to expose the endpoints and Electron panel.
+
+End-to-end smoke verification:
+
+```bash
+docker compose up -d postgres
+cd svc-java
+./gradlew clean test        # Phase 4 integration tests run with the flag enabled
+./gradlew bootRun           # (optional) start the service locally with FEATURE_PAYMENTS=true
+cd ..
+SERVICE_BASE_URL=http://localhost:8080 FEATURE_PAYMENTS=true bash scripts/verify_phase4.sh
+```
+
+The script posts an invoice and receipt, validates the summary math/filters, and replays the payload to confirm idempotency. On success it prints `Phase 4 CLI verification completed successfully.`.
+
+## Phase 3 Diamonds
+
+Diamonds order approvals, delivery, and stone decisions are hidden by default. Export `FEATURE_DIAMONDS=true` when you want to expose the Phase 3 flows:
+
+- **Backend tests** — only the diamonds suites run with the flag enabled:
+  ```bash
+  cd svc-java
+  FEATURE_DIAMONDS=true ./gradlew test --tests 'com.hpvvssalesautomation.diamonds.*'
+  ```
+- **CLI smoke** — seeds the 200_/100_ tables from `fixtures/diamonds.sample.csv`, exercises each endpoint twice, and asserts idempotency:
+  ```bash
+  docker compose -f infra/docker-compose.yml --profile service up -d
+  FEATURE_DIAMONDS=true ./scripts/verify_phase3.sh
+  docker compose -f infra/docker-compose.yml --profile service down
+  ```
+- **Electron UI** — launch with the flag to reveal the diamonds buttons (`FEATURE_DIAMONDS=true npm run dev`).
+
+On success the smoke script prints `Phase 3 CLI verification completed successfully.`.
+
+## Staging
+
+Use the helper scripts to bring the stack up with both feature flags enabled for smoke testing:
+
+- Enable staging:
+  ```bash
+  bash scripts/staging_enable.sh
+  ```
+  This exports `FEATURE_DIAMONDS=true` and `FEATURE_PAYMENTS=true`, launches Postgres and `svc-java`, seeds the database, and executes the Phase 3 and Phase 4 smoke suites.
+- Disable staging:
+  ```bash
+  bash scripts/staging_disable.sh
+  ```
+  The script unsets the feature flags and stops the `svc-java` container, restoring the default state where both features remain hidden.

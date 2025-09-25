@@ -1,0 +1,13 @@
+{
+  "name": "hp-vvs-ui",
+  "version": "0.1.0",
+  "description": "Electron renderer for HP / VVS Sales Automation over HTTP",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron ."
+  },
+  "dependencies": {
+    "electron": "^29.0.0"
+  }
+}

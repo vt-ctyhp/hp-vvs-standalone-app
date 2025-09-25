@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  phase2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Phase 2 smoke verification
+        run: ./scripts/verify_phase2.sh
+
+  phase3:
+    runs-on: ubuntu-latest
+    env:
+      FEATURE_DIAMONDS: "true"
+      BASE_URL: http://127.0.0.1:8080
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run Phase 3 integration tests
+        working-directory: svc-java
+        run: ./gradlew test --tests 'com.hpvvssalesautomation.diamonds.*'
+      - name: Validate OpenAPI contract
+        working-directory: svc-java
+        run: ./gradlew test --tests 'com.hpvvssalesautomation.diamonds.ApiContractTests'
+      - name: Start backend stack
+        run: docker compose -f infra/docker-compose.yml --profile service up -d
+      - name: Run Phase 3 smoke script
+        run: ./scripts/verify_phase3.sh
+      - name: Tear down backend stack
+        if: always()
+        run: docker compose -f infra/docker-compose.yml --profile service down --volumes --remove-orphans

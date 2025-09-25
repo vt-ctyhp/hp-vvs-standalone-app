@@ -1,0 +1,63 @@
+{
+  "info": {
+    "name": "HP VVS Phase 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "Client Status Submit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rootApptId\": \"HP-1001\",\n  \"salesStage\": \"CONSULT\",\n  \"conversionStatus\": \"OPEN\",\n  \"customOrderStatus\": \"N/A\",\n  \"inProductionStatus\": null,\n  \"centerStoneOrderStatus\": null,\n  \"nextSteps\": \"Book DV\",\n  \"assistedRep\": \"Alex\",\n  \"updatedBy\": \"postman@local\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/client-status/submit",
+          "host": ["{{baseUrl}}"],
+          "path": ["client-status", "submit"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Record Deadline",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rootApptId\": \"HP-1001\",\n  \"deadlineType\": \"3D\",\n  \"deadlineDate\": \"2025-10-01\",\n  \"movedBy\": \"postman@local\",\n  \"assistedRep\": \"Alex\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/deadlines/record",
+          "host": ["{{baseUrl}}"],
+          "path": ["deadlines", "record"]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}
