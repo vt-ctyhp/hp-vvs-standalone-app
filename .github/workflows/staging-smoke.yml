@@ -1,0 +1,38 @@
+name: Staging Smoke
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  staging-smoke:
+    runs-on: ubuntu-latest
+    env:
+      FEATURE_DIAMONDS: "true"
+      FEATURE_PAYMENTS: "true"
+      FEATURE_REPORTS: "true"
+      BASE_URL: http://127.0.0.1:8080
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client jq
+
+      - name: Build service image
+        run: docker compose -f infra/docker-compose.yml --profile service build svc-java
+
+      - name: Run staging smokes
+        run: bash scripts/staging_enable.sh
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f infra/docker-compose.yml --profile service down --volumes --remove-orphans
