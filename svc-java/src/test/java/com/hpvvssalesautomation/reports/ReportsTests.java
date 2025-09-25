@@ -37,6 +37,7 @@ class ReportsTests extends AbstractIntegrationTest {
         insertLedger("SO", "HP-501", "SO-501", "INVOICE", "ISSUED", "2024-07-01T18:00:00Z", new BigDecimal("8200.00"), null);
         insertLedger("SO", "HP-501", "SO-501", "RECEIPT", "ISSUED", "2024-07-02T18:05:00Z", new BigDecimal("2400.00"), new BigDecimal("2500.00"));
         insertLedger("SO", "HP-502", "SO-502", "INVOICE", "ISSUED", "2024-07-05T17:00:00Z", new BigDecimal("3500.00"), null);
+
     }
 
     @Test
@@ -45,7 +46,6 @@ class ReportsTests extends AbstractIntegrationTest {
                 "/reports/by-status?filters=status:Deposit,includeProductionCols:true",
                 ReportsResponse.class
         );
-
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         ReportsResponse body = response.getBody();
         assertThat(body).isNotNull();

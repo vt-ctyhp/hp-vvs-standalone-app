@@ -21,6 +21,7 @@ services:
       APP_TIMEZONE: ${APP_TIMEZONE:-America/Los_Angeles}
       FEATURE_DIAMONDS: ${FEATURE_DIAMONDS:-false}
       FEATURE_PAYMENTS: ${FEATURE_PAYMENTS:-false}
+      FEATURE_REPORTS: ${FEATURE_REPORTS:-false}
     ports:
       - "8080:8080"
     depends_on:

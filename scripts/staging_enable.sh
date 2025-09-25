@@ -7,12 +7,13 @@ BASE_URL=${BASE_URL:-http://localhost:8080}
 SVC_DIR="$ROOT_DIR/svc-java"
 FEATURE_DIAMONDS="true"
 FEATURE_PAYMENTS="true"
+FEATURE_REPORTS=${FEATURE_REPORTS:-false}
 DB_USERNAME=${DB_USERNAME:-hpvvs}
 DB_PASSWORD=${DB_PASSWORD:-hpvvs}
 DB_NAME=${DB_NAME:-hp_vvs}
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-5432}
-export FEATURE_DIAMONDS FEATURE_PAYMENTS BASE_URL DB_USERNAME DB_PASSWORD DB_NAME DB_HOST DB_PORT
+export FEATURE_DIAMONDS FEATURE_PAYMENTS FEATURE_REPORTS BASE_URL DB_USERNAME DB_PASSWORD DB_NAME DB_HOST DB_PORT
 
 require_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -68,7 +69,7 @@ if ! start_services_if_defined; then
   if docker compose -f "$COMPOSE_FILE" config --services 2>/dev/null | grep -qx "postgres"; then
     docker compose -f "$COMPOSE_FILE" up -d postgres
   fi
-  (cd "$SVC_DIR" && FEATURE_DIAMONDS=true FEATURE_PAYMENTS=true ./gradlew bootRun >/tmp/staging-boot.log 2>&1) &
+  (cd "$SVC_DIR" && FEATURE_DIAMONDS=true FEATURE_PAYMENTS=true FEATURE_REPORTS="$FEATURE_REPORTS" ./gradlew bootRun >/tmp/staging-boot.log 2>&1) &
   BOOTRUN_PID=$!
   sleep 5
 fi
@@ -79,5 +80,9 @@ bash "$ROOT_DIR/scripts/seed.sh"
 
 bash "$ROOT_DIR/scripts/verify_phase3.sh"
 bash "$ROOT_DIR/scripts/verify_phase4.sh"
+
+if [[ "${FEATURE_REPORTS}" == "true" ]]; then
+  bash "$ROOT_DIR/scripts/verify_phase5.sh"
+fi
 
 echo "Staging verification completed successfully."

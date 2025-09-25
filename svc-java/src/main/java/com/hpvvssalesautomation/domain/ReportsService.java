@@ -22,6 +22,11 @@ import java.util.Set;
 public class ReportsService {
 
     private static final Set<String> RECEIPT_BLOCKED_STATUSES = Set.of("VOID", "VOIDED", "CANCELLED", "CANCELED", "REVERSED");
+    private static final Map<String, String> FILTER_COLUMN_OVERRIDES = Map.of(
+            "status", "m.sales_stage",
+            "salesstage", "m.sales_stage",
+            "sales_stage", "m.sales_stage"
+    );
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final TimeUtil timeUtil;
@@ -78,7 +83,6 @@ public class ReportsService {
         }
 
         sql.append(" ORDER BY COALESCE(" + orderColumn + ", ''), m.visit_date DESC NULLS LAST, m.root_appt_id");
-
         return jdbcTemplate.query(sql.toString(), params, (rs, rowNum) -> mapRow(rs, context.includeProduction()));
     }
 
@@ -178,10 +182,21 @@ public class ReportsService {
 
     private String resolveColumn(String key) {
         String normalized = key.trim().toLowerCase(Locale.US);
+        String override = FILTER_COLUMN_OVERRIDES.get(normalized);
+        if (override != null) {
+            return override;
+        }
         Map<String, List<String>> aliases = aliasRegistry.masterAppointmentAliases();
         for (Map.Entry<String, List<String>> entry : aliases.entrySet()) {
             for (String alias : entry.getValue()) {
-                if (alias != null && normalized.equals(alias.toLowerCase(Locale.US))) {
+                if (alias == null) {
+                    continue;
+                }
+                String aliasNormalized = alias.toLowerCase(Locale.US);
+                if (normalized.equals(aliasNormalized)) {
+                    if (normalized.equals("status") && entry.getKey().equals("Conversion Status")) {
+                        continue;
+                    }
                     return switch (entry.getKey()) {
                         case "Visit Date" -> "m.visit_date";
                         case "RootApptID" -> "m.root_appt_id";
@@ -202,7 +217,6 @@ public class ReportsService {
 
         return switch (normalized) {
             case "rep", "assignedrep" -> "m.assigned_rep";
-            case "status" -> "m.sales_stage";
             default -> null;
         };
     }

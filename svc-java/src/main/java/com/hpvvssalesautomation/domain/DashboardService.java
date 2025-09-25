@@ -134,16 +134,21 @@ public class DashboardService {
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM master WHERE " + deadlineColumn + " IS NOT NULL");
 
-        LocalDate upperBound = to.orElse(timeUtil.today());
-        sql.append(" AND " + deadlineColumn + " < :upper_bound");
-        params.addValue("upper_bound", upperBound);
-
         from.ifPresent(date -> {
-            sql.append(" AND " + deadlineColumn + " >= :lower_bound");
-            params.addValue("lower_bound", date);
+            sql.append(" AND visit_date >= :visit_from");
+            params.addValue("visit_from", date);
+        });
+        to.ifPresent(date -> {
+            sql.append(" AND visit_date <= :visit_to");
+            params.addValue("visit_to", date);
         });
 
+        LocalDate deadlineCutoff = to.orElse(timeUtil.today());
+        sql.append(" AND " + deadlineColumn + " < :deadline_cutoff");
+        params.addValue("deadline_cutoff", deadlineCutoff);
+
         sql.append(" AND (sales_stage IS NULL OR UPPER(sales_stage) <> 'ORDER COMPLETED')");
+        sql.append(" AND (conversion_status IS NULL OR UPPER(conversion_status) = 'WON')");
 
         Integer count = jdbcTemplate.query(sql.toString(), params,
                 rs -> rs.next() ? rs.getInt(1) : 0);
